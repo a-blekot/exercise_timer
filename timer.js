@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         function restartTimer() {
-            countdown = 90 * 60; // Restart the timer
+            countdown = 10;//90 * 60; // Restart the timer
             document.getElementById("message").textContent = ""; // Clear the message
             updateTimer(); // Start the timer again
             timerInterval = setInterval(updateTimer, 1000); // Resume the timer interval
