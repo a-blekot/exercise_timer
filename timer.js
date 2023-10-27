@@ -1,12 +1,21 @@
 document.addEventListener("DOMContentLoaded", function () {
-    let countdown = 10;//90 * 60;
-    let timerInterval;
-    let timerRunning = true; // Flag to track whether the timer is running
-    var playPromise
-    var isAudioPlaying = false
-    let audio
+    const TIMER_DURATION = 10; //90 * 60;
 
-    // Function to format time as "HH:MM:SS"
+    const TimerStates = {
+        IDLE: "IDLE",
+        TIMER_RUN: "TIMER_RUN",
+        TIMER_STOP: "TIMER_STOP",
+        ALARM: "ALARM"
+    };
+
+    let state = TimerStates.IDLE;
+    let countdown = TIMER_DURATION;
+    let timerInterval;
+    let playPromise;
+    let isAudioPlaying = false;
+
+    const audio = document.getElementById("audioPlayer");
+
     function formatTime(seconds) {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
@@ -15,109 +24,126 @@ document.addEventListener("DOMContentLoaded", function () {
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
     }
 
-    // Function to play a sound
     function playSound() {
-        if (isAudioPlaying) return
+        if (isAudioPlaying) return;
 
-        stopSound()
-        const audio = document.getElementById("audioPlayer"); // Get the audio element by ID
-        if (audio) {
-            playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
-                    // Automatic playback started!
-                    // Show playing UI.
-                    isAudioPlaying = true
-                    console.log("playSound() playPromise.then()");
-                })
-                    .catch(error => {
-                        // Auto-play was prevented
-                        // Show paused UI.
-                        console.log("playSound() playPromise.catch() error:", error);
-                    });
-            }
+        playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+                isAudioPlaying = true;
+            }).catch(error => {
+                console.error("playSound() error:", error);
+            });
         }
     }
 
-    // Function to stop audio playback
     function stopSound() {
-        const audio = document.getElementById("audioPlayer"); // Replace with your audio element ID
-        console.log("stopSound(), audio:", audio);
-        if (audio) {
-            console.log("stopSound()");
-            isAudioPlaying = false
-            audio.pause();
-            audio.currentTime = 0;
-        }
+        isAudioPlaying = false;
+        audio.pause();
+        audio.currentTime = 0;
     }
 
-    // Function to update the timer display
     function updateTimer() {
-        console.log("updateTimer()");
-        const formattedTime = formatTime(countdown);
-        document.getElementById("timer").textContent = formattedTime;
+        document.getElementById("timer").textContent = formatTime(countdown);
 
         if (countdown === 0) {
-            clearInterval(timerInterval);
-            document.getElementById("message").textContent = "It's time to take a break and do some exercise!";
-            playSound();
-            document.getElementById("restartButton").style.display = "block"; // Show the "Restart" button
-            document.getElementById("stopPlayButton").style.display = "none"; // Show the "Restart" button
+            transitionState(TimerStates.ALARM);
         } else {
             countdown--;
         }
     }
 
-    // Function to start the timer
-    function startTimer() {
-        console.log("startTimer()");
-        updateTimer();
-        timerInterval = setInterval(updateTimer, 1000);
-        document.getElementById("stopPlayButton").textContent = "Stop"; // Change button text to "Stop"
-        timerRunning = true; // Set the timer as running
-    }
+    function transitionState(newState) {
+        switch (newState) {
+            case "IDLE":
+                setTimer(stop = true, restartCountdown = true);
+                stopSound();
 
-    // Function to stop or play the timer
-    function stopPlayTimer() {
-        console.log("stopPlayTimer() timerRunning:", timerRunning);
-        if (timerRunning) {
-            clearInterval(timerInterval);
-            document.getElementById("stopPlayButton").textContent = "Play"; // Change button text to "Play"
-            document.getElementById("restartButton").style.display = "block"; // Show the "Restart" button
-        } else {
-            startTimer();
-            document.getElementById("stopPlayButton").textContent = "Stop"; // Change button text to "Stop"
-            document.getElementById("restartButton").style.display = "none"; // Hide the "Restart" button
+                hideMessage();
+                setMainButton("Play", isVisible = true);
+                setRestartButton(isVisible = false);
+                break;
+
+            case "TIMER_RUN":
+                setTimer();
+
+                hideMessage();
+                setMainButton("Stop", isVisible = true);
+                setRestartButton(isVisible = false);
+                break;
+
+            case "TIMER_STOP":
+                setTimer(stop = true);
+
+                hideMessage();
+                setMainButton("Play", isVisible = true);
+                setRestartButton(isVisible = true);
+                break;
+
+            case "ALARM":
+                setTimer(stop = true);
+                playSound();
+
+                showMessage();
+                setMainButton(isVisible = false);
+                setRestartButton(isVisible = true);
+                break;
         }
-        timerRunning = !timerRunning; // Toggle the timer state
+
+        state = newState;
     }
 
-    // Function to restart the timer
-    function restartTimer() {
-        console.log("restartTimer()");
-        countdown = 10;//90 * 60;
+    function hideMessage() {
         document.getElementById("message").textContent = "";
-        updateTimer();
-
-        // Clear the existing timerInterval (if it's running)
-        if (timerInterval) {
-            clearInterval(timerInterval);
-        }
-
-        // Stop any audio playback
-        stopSound();
-
-        // Start a new timer interval
-        timerInterval = setInterval(updateTimer, 1000);
-        document.getElementById("restartButton").style.display = "none"; // Hide the "Restart" button
-        document.getElementById("stopPlayButton").textContent = "Stop"; // Change button text to "Stop"
-        timerRunning = true; // Set the timer as running
     }
 
-    // Event listeners for buttons
-    document.getElementById("stopPlayButton").addEventListener("click", stopPlayTimer);
-    document.getElementById("restartButton").addEventListener("click", restartTimer);
+    function showMessage() {
+        document.getElementById("message").textContent = "It's time to take a break and do some exercise!";
+    }
 
-    // Start the timer when the page loads
-    startTimer(); // Call the startTimer function to initiate the timer
+    function setMainButton(title = "", isVisible) {
+        if (!isVisible) {
+            document.getElementById("stopPlayButton").style.display = "none";
+        } else {
+            document.getElementById("stopPlayButton").style.display = "block";
+            document.getElementById("stopPlayButton").textContent = title;
+        }
+    }
+
+    function setRestartButton(isVisible) {
+        if (isVisible) {
+            document.getElementById("restartButton").style.display = "block";
+        } else {
+            document.getElementById("restartButton").style.display = "none";
+        }
+    }
+
+    function setTimer(stop = false, restartCountdown = false) {
+        if (restartCountdown) {
+            countdown = TIMER_DURATION;
+        }
+
+        if (stop) {
+            clearInterval(timerInterval);
+        } else {
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+    }
+
+    document.getElementById("stopPlayButton").addEventListener("click", () => {
+        if (state === TimerStates.TIMER_RUN) {
+            transitionState(TimerStates.TIMER_STOP);
+        } else if (state === TimerStates.TIMER_STOP || state === TimerStates.IDLE) {
+            transitionState(TimerStates.TIMER_RUN);
+        }
+    });
+
+    document.getElementById("restartButton").addEventListener("click", () => {
+        transitionState(TimerStates.IDLE);
+        transitionState(TimerStates.TIMER_RUN);
+    });
+
+    // Initialize the state
+    transitionState(TimerStates.IDLE);
+    updateTimer();
 });
