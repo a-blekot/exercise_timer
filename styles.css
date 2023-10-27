@@ -74,3 +74,91 @@ button:active {
     transform: scale(0.95);
     /* Slightly scale down the button when clicked */
 }
+
+/* Container for the inputs to center them */
+input-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    /* Space between the inputs */
+    margin-top: 20px;
+    /* Space above the input line */
+}
+
+/* Common styles for both inputs */
+#minutesInput,
+#secondsInput {
+    width: 100px;
+    /* Fixed width for both inputs */
+    padding: 5px 10px;
+    font-size: 16px;
+    border: 2px solid #4a90e2;
+    /* Blue border */
+    border-radius: 5px;
+    /* Rounded corners */
+    text-align: center;
+    /* Center the numbers */
+    outline: none;
+    /* Remove the default focus outline */
+}
+
+/* Enhance the appearance on focus */
+#minutesInput:focus,
+#secondsInput:focus {
+    border-color: #e94e77;
+    /* Pinkish color for focus */
+    box-shadow: 0 0 5px rgba(233, 78, 119, 0.5);
+    /* Soft glow on focus */
+}
+
+/* Container for the inputs to center them */
+.input-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    /* Space between the inputs */
+    margin-top: 20px;
+    /* Space above the input line */
+}
+
+.input-container button,
+.input-container input {
+    margin: 0;
+    padding: 5px 10px;
+    /* Adjust as needed */
+}
+
+/* Common styles for both inputs */
+#hoursInput,
+#minutesInput,
+#secondsInput {
+    width: 60px;
+    /* Fixed width for both inputs */
+    padding: 5px 10px;
+    font-size: 16px;
+    border: 2px solid #4a90e2;
+    /* Blue border */
+    border-radius: 5px;
+    /* Rounded corners */
+    text-align: center;
+    /* Center the numbers */
+    outline: none;
+    /* Remove the default focus outline */
+}
+
+/* Enhance the appearance on focus */
+#hoursInput:focus,
+#minutesInput:focus,
+#secondsInput:focus {
+    border-color: #e94e77;
+    /* Pinkish color for focus */
+    box-shadow: 0 0 5px rgba(233, 78, 119, 0.5);
+    /* Soft glow on focus */
+}
+
+#setTimerButton {
+    margin-left: 0px;
+    /* Adjust the value as needed */
+}

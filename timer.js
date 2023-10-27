@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const TIMER_DURATION = 10; //90 * 60;
-
     const TimerStates = {
         IDLE: "IDLE",
         TIMER_RUN: "TIMER_RUN",
@@ -9,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     let state = TimerStates.IDLE;
-    let countdown = TIMER_DURATION;
+    let countdown;
     let timerInterval;
     let playPromise;
     let isAudioPlaying = false;
@@ -53,15 +51,27 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function resetCountDown() {
+        const hours = parseInt(document.getElementById("hoursInput").value, 10) || 0;
+        const minutes = parseInt(document.getElementById("minutesInput").value, 10) || 0;
+        const seconds = parseInt(document.getElementById("secondsInput").value, 10) || 0;
+
+        countdown = (hours * 3600) + (minutes * 60) + seconds;
+
+        // Update the timer display immediately
+        document.getElementById("timer").textContent = formatTime(countdown);
+    }
+
     function transitionState(newState) {
         switch (newState) {
             case "IDLE":
-                setTimer(stop = true, restartCountdown = true);
+                setTimer(stop = true, reset = true);
                 stopSound();
 
                 hideMessage();
-                setMainButton("Play", isVisible = true);
+                setMainButton("Start", isVisible = true);
                 setRestartButton(isVisible = false);
+                setTimerVisibility(isVisible = true);
                 break;
 
             case "TIMER_RUN":
@@ -70,14 +80,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 hideMessage();
                 setMainButton("Stop", isVisible = true);
                 setRestartButton(isVisible = false);
+                setTimerVisibility(isVisible = false);
                 break;
 
             case "TIMER_STOP":
                 setTimer(stop = true);
 
                 hideMessage();
-                setMainButton("Play", isVisible = true);
+                setMainButton("Continue", isVisible = true);
                 setRestartButton(isVisible = true);
+                setTimerVisibility(isVisible = true);
                 break;
 
             case "ALARM":
@@ -103,24 +115,42 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function setMainButton(title = "", isVisible) {
         if (!isVisible) {
-            document.getElementById("stopPlayButton").style.display = "none";
+            hide("stopPlayButton");
         } else {
-            document.getElementById("stopPlayButton").style.display = "block";
+            show("stopPlayButton");
             document.getElementById("stopPlayButton").textContent = title;
         }
     }
 
     function setRestartButton(isVisible) {
         if (isVisible) {
-            document.getElementById("restartButton").style.display = "block";
+            show("restartButton");
         } else {
-            document.getElementById("restartButton").style.display = "none";
+            hide("restartButton");
         }
     }
 
-    function setTimer(stop = false, restartCountdown = false) {
-        if (restartCountdown) {
-            countdown = TIMER_DURATION;
+    function setTimerVisibility(isVisible) {
+        if (isVisible) {
+            show("durationLabel");
+            show("inputContainer");
+        } else {
+            hide("durationLabel");
+            hide("inputContainer");
+        }
+    }
+
+    function show(id) {
+        document.getElementById(id).style.display = "block";
+    }
+
+    function hide(id) {
+        document.getElementById(id).style.display = "none";
+    }
+
+    function setTimer(stop = false, reset = false) {
+        if (reset) {
+            resetCountDown();
         }
 
         if (stop) {
@@ -139,11 +169,21 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.getElementById("restartButton").addEventListener("click", () => {
-        transitionState(TimerStates.IDLE);
-        transitionState(TimerStates.TIMER_RUN);
+        if (state === TimerStates.ALARM) {
+            transitionState(TimerStates.IDLE);
+        } else if (state === TimerStates.TIMER_STOP) {
+            transitionState(TimerStates.IDLE);
+            transitionState(TimerStates.TIMER_RUN);
+        }
+    });
+
+    document.getElementById("setTimerButton").addEventListener("click", function () {
+        resetCountDown()
+
+        // If you want to automatically start the timer after setting it, call:
+        // transitionState("TIMER_RUN");
     });
 
     // Initialize the state
     transitionState(TimerStates.IDLE);
-    updateTimer();
 });

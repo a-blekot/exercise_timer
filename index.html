@@ -21,6 +21,16 @@
     <button id="restartButton" style="display: none;">Restart</button>
   </div>
 
+  <p id="durationLabel">Set a timer duration:</p>
+  <div id="inputContainer" class="input-container">
+    <input type="number" id="hoursInput" placeholder="Hour" min="0" max="24" value="1">
+    <span>:</span>
+    <input type="number" id="minutesInput" placeholder="Min" min="0" max="59">
+    <span>:</span>
+    <input type="number" id="secondsInput" placeholder="Sec" min="0" max="59">
+    <button id="setTimerButton">Set Timer</button>
+  </div>
+
   <audio id="audioPlayer" src="timer.mp3"></audio>
 
   <script src="timer.js"></script>
