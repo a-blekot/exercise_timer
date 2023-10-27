@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Function to start the timer
     function startTimer() {
         // Set the initial countdown time to 90 minutes (90 * 60 seconds)
-        let countdown = 90 * 60;
+        let countdown = 10;// 90 * 60;
         let timerInterval;
 
         function updateTimer() {
